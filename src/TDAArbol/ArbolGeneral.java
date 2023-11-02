@@ -7,11 +7,12 @@ import TDALista.EmptyListException;
 import TDALista.InvalidPositionException;
 import TDALista.Position;
 import TDALista.PositionList;
+import TDAMap.Map;
 import TDALista.ListaDE;
 
 public class ArbolGeneral<E> implements Tree<E>{
 	
-	protected Position<E> root;
+	protected TNodo<E> root;
 	protected int size;
 	
 	public ArbolGeneral() {
@@ -231,18 +232,18 @@ public class ArbolGeneral<E> implements Tree<E>{
 
 	@Override
 	public void removeInternalNode(Position<E> p) throws InvalidPositionException {
-		if(isEmpty()) throw new InvalidPositionException("el arbol esta vacio");
-		//if(isExternal(p)) throw new InvalidPositionException("el nodo pasado es externo");
+		/*if(isEmpty()) throw new InvalidPositionException("el arbol esta vacio");
+		if(isExternal(p)) throw new InvalidPositionException("nodo externo");
 		try {
 		TNodo<E> nodo = checkNode(p);
-		if(p == root){// el nodo que se pretende eliminar es la raiz
+		if(nodo == root){// el nodo que se pretende eliminar es la raiz
 			if(nodo.getHijos().size()==1)//la raiz tiene un solo hijo
 			{
 				// se quiere eliminar la raiz pero no es posible por la estructura del arbol.
 				Position<TNodo<E>> rN= nodo.getHijos().first();
 				rN.element().setPadre(null);
-				nodo.getHijos().remove(rN);
-				nodo = rN.element();
+				root.getHijos().remove(rN);
+				root = rN.element();
 				size--;
 			}
 			else{
@@ -274,21 +275,55 @@ public class ArbolGeneral<E> implements Tree<E>{
 				nodo.setHijos(null);
 				size--;
 			}
-			else throw new InvalidPositionException("posicion invalida");
+			else 
+				throw new InvalidPositionException("posicion invalida");
 			}
-			/*else {
-				if(nodo.getHijos().size() <= 1) {
-					TNodo<E> nuevo = nodo.getHijos().first().element();
-					nodo.getHijos().remove(nodo.getHijos().first());
-					root = nuevo;
-					size--;
-				}
-				else
-					throw new InvalidPositionException("la raiz tiene mas de un hijo");
-			}*/
 		}
-		catch(InvalidPositionException | BoundaryViolationException | EmptyListException e) {}
-	}
+		catch(InvalidPositionException | BoundaryViolationException | EmptyListException e) {}*/
+	        TNodo<E> nodo = checkNode(p);
+	        if (isExternal(p))
+	            throw new InvalidPositionException("p no es un nodo interno");
+	        if (nodo == root)
+	            if (nodo.getHijos().size() > 1)
+	                throw new InvalidPositionException("el nodo raiz a eliminar no puede tener mas de 1 hijo");
+	            else {
+	                try {
+	                    root = nodo.getHijos().first().element();
+	                    nodo.setElem(null);
+	                    nodo.getHijos().remove(nodo.getHijos().first());
+	                    root.setPadre(null);
+	                } catch (EmptyListException e) {
+	                    System.out.println(e.getMessage());
+	                }
+	            }
+	        else {
+	            TNodo<E> pa = nodo.getPadre();
+	            PositionList<TNodo<E>> hijos = pa.getHijos();
+	            Iterator<Position<TNodo<E>>> it = hijos.positions().iterator();
+	            Position<TNodo<E>> me = null;
+	            boolean encontre = false;
+	            while (it.hasNext() && !encontre) {
+	                me = it.next();
+	                encontre = me.element() == nodo;
+	            }
+	            if (!encontre)
+	                throw new InvalidPositionException("N no figura como hijo de su padre");
+	            PositionList<TNodo<E>> hijosN = nodo.getHijos();
+	            it = hijosN.positions().iterator();
+	            while (it.hasNext()) {
+	                TNodo<E> nh = it.next().element();
+	                nh.setPadre(pa);
+	                hijos.addBefore(me, nh);
+	            }
+	            hijos.remove(me);
+	            nodo.setPadre(null);
+	            nodo.setElem(null);
+	            it = hijosN.positions().iterator();
+	            while (it.hasNext())
+	                hijosN.remove(it.next());
+	            size--;
+	        }
+	   }
 
 	@Override
 	public void removeNode(Position<E> p) throws InvalidPositionException {
@@ -327,4 +362,16 @@ public class ArbolGeneral<E> implements Tree<E>{
 			preOrdenPositions(hijos, l);
 		}
 	}
+	public void eliminarUltimoHijo(Position<E> p) throws InvalidPositionException, InvalidOperationException {
+		TNodo<E> nodo = checkNode(p);
+		if(nodo == root) throw new InvalidOperationException("es la raiz");
+		PositionList<TNodo<E>> hermanos = nodo.getPadre().getHijos();
+		try {
+			if(nodo == hermanos.last().element()) {
+				this.removeNode(p);
+			}
+		}catch(EmptyListException e) {}
+	}
+	
+	
 }

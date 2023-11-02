@@ -70,7 +70,7 @@ public class Ejercicio_1<K, V> {
 		try {
 			for(Character c : l) {
 				if(m.get(c) == null)
-					m.put(c, 0);
+					m.put(c, 1);
 				else
 					m.put(c, m.get(c)+1);
 			}
