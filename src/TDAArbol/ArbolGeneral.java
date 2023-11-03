@@ -373,5 +373,12 @@ public class ArbolGeneral<E> implements Tree<E>{
 		}catch(EmptyListException e) {}
 	}
 	
+	public void preOrdenGraficar(Position<E> p) throws InvalidPositionException {
+		TNodo<E> nodo = checkNode(p);
+		System.out.print(nodo.elem);
+		for(TNodo<E> hijos : nodo.getHijos()) {
+			preOrdenGraficar(hijos);
+		}
+	}
 	
 }
