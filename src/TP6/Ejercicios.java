@@ -33,6 +33,16 @@ public class Ejercicios<E> {
 				m.put(c,cont+1);
 			}
 		}
+		/*otra forma de hacerlo
+		for(Character c1 : t) {
+			cont = m.get(c1);
+			if(cont == null) {
+				m.put(c1, 1);
+			}
+			else {
+				m.put(c1,cont+1);
+			}
+		}*/
 		return m;
 	}
 	
@@ -46,7 +56,8 @@ public class Ejercicios<E> {
 	
 	public Iterable<Position<String>> ej4(Tree<String> t, String s) throws InvalidPositionException, EmptyTreeException{
 		 PositionList<Position<String>> l = new ListaDE<>();
-		 postOrden4(s,t,l,t.root());
+		 if(!t.isEmpty())
+			 postOrden4(s,t,l,t.root());
 		 return l;
 	}
 	
