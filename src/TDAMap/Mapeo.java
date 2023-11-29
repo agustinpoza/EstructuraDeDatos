@@ -111,7 +111,6 @@ public class Mapeo<K,V> implements Map<K,V> {
 	
 	private void checkKey(K key) throws InvalidKeyException{
 		if(key==null) throw new InvalidKeyException("key invalida");
-		
 	}
 	
 }

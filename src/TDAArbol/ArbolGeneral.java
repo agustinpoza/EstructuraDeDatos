@@ -1,7 +1,7 @@
 package TDAArbol;
 
 import java.util.Iterator;
-
+import TDACola.*;
 import TDALista.BoundaryViolationException;
 import TDALista.EmptyListException;
 import TDALista.InvalidPositionException;
@@ -381,4 +381,48 @@ public class ArbolGeneral<E> implements Tree<E>{
 		}
 	}
 	
+	public void agregarNivel(E rotulo, int nivel) throws InvalidPositionException {
+		if(!isEmpty() && nivel != 0)
+			recorrido(root, rotulo, nivel);
+	}
+	
+	private int nivel(TNodo<E> n) {
+		if(n == root)
+			return 0;
+		else
+			return nivel(n.getPadre()) + 1;
+	}
+	
+	private void recorrido(TNodo<E> n, E rotulo, int nivel) throws InvalidPositionException {
+		for(Position<TNodo<E>> hijos : n.getHijos().positions()) {
+			if(nivel(hijos.element())<nivel) 
+				recorrido(hijos.element(),rotulo,nivel);
+			
+			if(nivel(hijos.element()) == nivel) {
+				n.getHijos().addAfter(hijos, new TNodo<E>(rotulo, n));;
+				size++;
+			}
+		}
+	}
+	
+	public void graficarNiveles() throws EmptyQueueException {
+		Queue<TNodo<E>> q = new ColaEnlazada<>();
+		q.enqueue(root);
+		q.enqueue(null);
+		while(!q.isEmpty()) {
+			TNodo<E> v = q.dequeue();
+			if(v != null) {
+				System.out.print(v.element());
+				for(TNodo<E> hijo : v.getHijos()) {
+					q.enqueue(hijo);
+				}
+			}
+			else {
+				System.out.println();
+				if(!q.isEmpty())
+					q.enqueue(null);
+			}
+		}
+	}
+	 
 }

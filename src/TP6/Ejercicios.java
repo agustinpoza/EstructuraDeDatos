@@ -6,7 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import TDAMap.MapeoHashAbierto;
 import TDAArbol.EmptyTreeException;
 import TDAArbol.Tree;
+import TDAArbolBinario.BinaryTree;
 import TDACola.*;
+import TDALista.BoundaryViolationException;
 import TDALista.InvalidPositionException;
 import TDALista.Position;
 import TDALista.ListaDE;
@@ -17,6 +19,24 @@ import TDAMap.Map;
 public class Ejercicios<E> {
 	
 	public Ejercicios() {} 
+	
+	
+	
+	public Map<Character,Integer> profundidadNodos(Tree<Character> t) throws InvalidKeyException, EmptyTreeException, InvalidPositionException, BoundaryViolationException{
+		Map<Character,Integer> m = new MapeoHashAbierto<>();
+		for(Position<Character> n : t.positions()) {
+			m.put(n.element(),profundidad(n,t));
+		}
+		return m;
+	}
+	
+	public int profundidad(Position<Character> n, Tree<Character> t) throws EmptyTreeException, InvalidPositionException, BoundaryViolationException {
+		if(n == t.root())
+			return 0;
+		else 
+			return profundidad(t.parent(n),t) + 1;
+	}
+	
 	
 	public Map<Character, Integer> cantidadRepeticiones(Tree<Character> t) throws InvalidKeyException{
 		Iterator<Character> i = t.iterator();
@@ -119,5 +139,29 @@ public class Ejercicios<E> {
 		}
 		return pertenece;
 	}
+	
+	public void removerNodosR(Tree<Character> t, Character c) {
+		PositionList<Position<Character>> l = new ListaDE<>();
+		try {
+		postOrden(t,c,l,t.root());
+		for(Position<Character> p : l) {
+			t.removeNode(p);
+		}
+		}catch(EmptyTreeException | InvalidPositionException e) {}
+	}
+	
+	private void postOrden(Tree<Character> t, Character c, PositionList<Position<Character>> l, Position<Character> p){
+		try {
+		for(Position<Character> hijos : t.children(p)) {
+			postOrden(t,c,l,hijos);
+		}
+		if(p.element().equals(c))
+			l.addLast(p);
+		}catch(InvalidPositionException e) {}
+	}
+	
+	
+	
+	
 	
 }

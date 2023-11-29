@@ -1,9 +1,13 @@
 package TDAArbolBinario;
 
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import TDAArbol.EmptyTreeException;
 import TDAArbol.InvalidOperationException;
+import TDADiccionario.Dictionary;
+import TDADiccionario.DiccionarioHashAbierto;
+import TDADiccionario.InvalidKeyException;
 import TDALista.BoundaryViolationException;
 import TDALista.InvalidPositionException;
 import TDALista.Position;
@@ -69,11 +73,13 @@ public class ArbolBinario<E> implements BinaryTree<E> {
 	public Iterable<Position<E>> children(Position<E> v) throws InvalidPositionException {
 		BTNodo<E> n = checkNode(v);
 		PositionList<Position<E>> p = new ListaDE<>();
-		if(n.getHD()!=null)
-			p.addLast(n.getHD());
+		
 		if(n.getHI()!=null) {
 			p.addLast(n.getHI());
 		}
+		if(n.getHD()!=null)
+			p.addLast(n.getHD());
+		
 		return p;
 	}
 
@@ -118,14 +124,14 @@ public class ArbolBinario<E> implements BinaryTree<E> {
 	public boolean hasLeft(Position<E> v) throws InvalidPositionException {
 		if(isEmpty()) throw new InvalidPositionException("Arbol vacio");
 		BTNodo<E> n = checkNode(v);
-		return n.HD!=null;
+		return n.getHI()!=null;
 	}
 
 	@Override
 	public boolean hasRight(Position<E> v) throws InvalidPositionException {
 		if(isEmpty()) throw new InvalidPositionException("Arbol vacio");
 		BTNodo<E> n = checkNode(v);
-		return n.HI!=null;
+		return n.getHD()!=null;
 	}
 
 	@Override
@@ -172,17 +178,48 @@ public class ArbolBinario<E> implements BinaryTree<E> {
 		if(isEmpty()) throw new InvalidPositionException("arbol vacio");
 		BTNodo<E> n = checkNode(v);
 		if(!(n == root)) {
-			BTNodo<E> padre = checkNode(v).getPadre();
-			if(padre.getHD()!=null && padre.getHI()!=null) throw new InvalidOperationException("El nodo tiene mas de un hijo");
-			if(padre.getHD() == n) {
-				padre.setHD(null);
-				n.setPadre(null);
-				size--;
-			}
-			if(padre.getHI() == n){
-				padre.setHI(null);
-				n.setPadre(null);
-				size--;
+			if(isInternal(v)) {
+				if(n.getHD()!=null && n.getHI()!=null) throw new InvalidOperationException("El nodo tiene mas de un hijo");
+				if(n.getHD() != null) {
+					if(n.getPadre().getHD() == n) {
+						n.getPadre().setHD(n.getHD());
+						n.setHD(null);
+						n.setPadre(null);
+						size--;
+					}
+					if(n.getPadre().getHI() == n) {
+						n.getPadre().setHI(n.getHD());
+						n.setHD(null);
+						n.setPadre(null);
+						size--;
+					}
+				}
+				if(n.getHI() != null){
+					if(n.getPadre().getHD() == n) {
+						n.getPadre().setHD(n.getHI());
+						n.setHI(null);
+						n.setPadre(null);
+						size--;
+					}
+					if(n.getPadre().getHI() == n) {
+						n.getPadre().setHI(n.getHI());
+						n.setHI(null);
+						n.setPadre(null);
+						size--;
+					}
+				}
+			}else {
+				BTNodo<E> padre = checkNode(v).getPadre();
+				if(padre.getHD() == n) {
+					padre.setHD(null);
+					n.setPadre(null);
+					size--;
+				}
+				if(padre.getHI() == n) {
+					padre.setHI(null);
+					n.setPadre(null);
+					size--;
+				}
 			}
 		}
 		else {
@@ -197,6 +234,10 @@ public class ArbolBinario<E> implements BinaryTree<E> {
 				root = n.getHI();
 				n.getHI().setPadre(null);;
 				n.setHI(null);
+				size--;
+			}
+			if(n.getHD() == null && n.getHI()==null) {
+				root = null;
 				size--;
 			}
 		}
@@ -247,4 +288,55 @@ public class ArbolBinario<E> implements BinaryTree<E> {
 			preOrdenPositions(n.getHD(),l);
 	}
 	
+	public void preOrdenShellEj2(BTNodo<E> n, Dictionary<E,E> d) throws InvalidKeyException {
+		if(n.getHD()!=null) {
+			d.insert(n.element(), n.getHD().element());
+			preOrdenShellEj2(n.getHD(),d);
+		}
+		if(n.getHI()!=null) {
+			d.insert(n.element(), n.getHI().element());
+			preOrdenShellEj2(n.getHI(),d);
+			
+		}
+	}
+
+	public Dictionary<E,E> preOrdenEj2(){
+		Dictionary<E,E> d = new DiccionarioHashAbierto<>();
+		try {
+			preOrdenShellEj2(root,d);
+		} catch (InvalidKeyException e) {e.printStackTrace();}
+		return d;
+	}
+	
+	public void eliminarSubarbol(Position<E> p) throws InvalidPositionException{
+		Iterator<Position<E>> i = this.positions().iterator();
+		Position<E> posicionIt;
+		boolean encontre = false;
+		while(i.hasNext() && !encontre) {
+			posicionIt = i.next();
+			if(posicionIt == p) {
+				encontre = true;
+				BTNodo<E> n = checkNode(p);
+				AtomicInteger a = new AtomicInteger();
+				contarNodos(n,a);
+				this.size = size - a.get();
+				n.setHD(null);
+				n.setHI(null);
+				n.setPadre(null);
+			}
+		}
+	}
+	
+	public void contarNodos(BTNodo<E> n, AtomicInteger cont) {
+		if(n.getHD()!=null || n.getHD()!=null) {
+			if(n.getHD()!=null) {
+				cont.incrementAndGet();
+				contarNodos(n.getHD(),cont);
+			}
+			if(n.getHI()!=null) {
+				cont.incrementAndGet();
+				contarNodos(n.getHI(),cont);
+			}
+		}
+	}
 }
