@@ -1,21 +1,26 @@
 package ABB;
 import java.util.Comparator;
 
-import TDAMap.Entry;
 import TDAMap.InvalidKeyException;
-import TDAMap.Map;
-public class MapABB<K extends Comparable<K>, V> implements Map<K,V>{
+import TDAMap.*;
+
+public class MapABB<K extends Comparable<K>,V> implements Map<K,V>{
 	
 	protected NodoABB<K,V> root;
 	protected Comparator<K> comp;
 	protected int size;
 	
 	public MapABB(Comparator<K> comp) {
-		//root = new NodoABB<K,V>(null,null,null);
+		root = new NodoABB<K,V>(null,null,null);
 		this.comp = comp;
 		size = 0;
 	}
 	
+	
+	public void expandir(NodoABB<K,V> p) {
+		p.setLeft(new NodoABB<>(null,null,p));
+		p.setRight(new NodoABB<>(null,null,p));
+	}
 	
 	public void createRoot(K key, V value) {
 		if(size == 0 && root == null) {
@@ -119,8 +124,8 @@ public class MapABB<K extends Comparable<K>, V> implements Map<K,V>{
 
 	@Override
 	public V get(K key) throws InvalidKeyException {
-		// TODO Auto-generated method stub
-		return null;
+		checkKey(key);
+		return this.buscar(key).getValue();
 	}
 
 
@@ -128,6 +133,7 @@ public class MapABB<K extends Comparable<K>, V> implements Map<K,V>{
 
 	@Override
 	public V put(K key, V value) throws InvalidKeyException {
+		checkKey(key);
 		V toReturn = null;
 		if(size == 0 && root == null) {
 			this.createRoot(key, value);
@@ -135,12 +141,14 @@ public class MapABB<K extends Comparable<K>, V> implements Map<K,V>{
 		}
 		else {
 			NodoABB<K,V> n = this.buscar(key);
-			if(n != null) {
+			if(n.getValue() != null) {
 				toReturn = n.getValue();
 				n.setValue(value);
 			}
 			else {
-				
+				n.setKey(key);
+				n.setValue(value);
+				expandir(n);
 			}
 				
 		}
@@ -152,8 +160,10 @@ public class MapABB<K extends Comparable<K>, V> implements Map<K,V>{
 
 	@Override
 	public V remove(K key) throws InvalidKeyException {
-		// TODO Auto-generated method stub
-		return null;
+		checkKey(key);
+		V toReturn = this.buscar(key).getValue();
+		this.eliminar(this.buscar(key));
+		return toReturn;
 	}
 
 
@@ -178,7 +188,7 @@ public class MapABB<K extends Comparable<K>, V> implements Map<K,V>{
 
 
 	@Override
-	public Iterable<Entry<K, V>> entries() {
+	public Iterable<TDAMap.Entry<K, V>> entries() {
 		// TODO Auto-generated method stub
 		return null;
 	}

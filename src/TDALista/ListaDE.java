@@ -166,6 +166,14 @@ public class ListaDE<E> implements PositionList<E> {
     	}catch(InvalidPositionException | EmptyListException e) {}
     }
     
+    
+    public PositionList<E> clone(){
+    	PositionList<E> l = new ListaDE<>();
+    	for(E e : this) {
+    		l.addLast(e);
+    	}
+    	return l;
+    }
  
 
     private Nodo<E> checkPosition(Position<E> p) throws InvalidPositionException {
