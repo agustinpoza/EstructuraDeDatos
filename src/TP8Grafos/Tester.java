@@ -23,6 +23,9 @@ public class Tester<V,E> {
 			Vertex<Character> v11 = g.insertVertex('k');
 			Vertex<Character> v12 = g.insertVertex('l');
 			Vertex<Character> v13 = g.insertVertex('m');
+			Vertex<Character> v14 = g.insertVertex('n');
+			Vertex<Character> v15 = g.insertVertex('o');
+			Vertex<Character> v16 = g.insertVertex('p');
 			
 			Edge<Float> e1 = g.insertEdge(v1, v2, 1f);
 			Edge<Float> e2 = g.insertEdge(v1, v3, 1f);
@@ -77,6 +80,8 @@ public class Tester<V,E> {
 			for(Vertex<Character> vertice : lista4) {
 				System.out.print(vertice.element());
 			}
+			System.out.println();
+			System.out.println(d.esConexoDFS(g));
 			
 		}catch(Exception e) {}
 	}

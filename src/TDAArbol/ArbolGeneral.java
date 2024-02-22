@@ -232,98 +232,50 @@ public class ArbolGeneral<E> implements Tree<E>{
 
 	@Override
 	public void removeInternalNode(Position<E> p) throws InvalidPositionException {
-		/*if(isEmpty()) throw new InvalidPositionException("el arbol esta vacio");
-		if(isExternal(p)) throw new InvalidPositionException("nodo externo");
-		try {
 		TNodo<E> nodo = checkNode(p);
-		if(nodo == root){// el nodo que se pretende eliminar es la raiz
-			if(nodo.getHijos().size()==1)//la raiz tiene un solo hijo
-			{
-				// se quiere eliminar la raiz pero no es posible por la estructura del arbol.
-				Position<TNodo<E>> rN= nodo.getHijos().first();
-				rN.element().setPadre(null);
-				root.getHijos().remove(rN);
-				root = rN.element();
-				size--;
+		if (isExternal(p))
+			throw new InvalidPositionException("p no es un nodo interno");
+		if (nodo == root)
+			if (nodo.getHijos().size() > 1)
+				throw new InvalidPositionException("el nodo raiz a eliminar no puede tener mas de 1 hijo");
+			else {
+				try {
+					root = nodo.getHijos().first().element();
+					nodo.setElem(null);
+					nodo.getHijos().remove(nodo.getHijos().first());
+					root.setPadre(null);
+				} catch (EmptyListException e) {
+					System.out.println(e.getMessage());
+				}
 			}
-			else{
-				throw new InvalidPositionException("Solo se puede eliminar la raiz si es el unico elemento o si tiene un solo hijo");
-			}
-		}
-		else{
-			TNodo<E> padre = nodo.getPadre();
-			PositionList<TNodo<E>> hermanos = padre.getHijos();
-			Position<TNodo<E>> positionNodo = hermanos.first();
+		else {
+			TNodo<E> pa = nodo.getPadre();
+			PositionList<TNodo<E>> hijos = pa.getHijos();
+			Iterator<Position<TNodo<E>>> it = hijos.positions().iterator();
+			Position<TNodo<E>> me = null;
 			boolean encontre = false;
-			while(positionNodo != null && !encontre) {
-				if(positionNodo.element() == nodo) {
-					encontre = true;
-				}
-				if(positionNodo != hermanos.last())
-					positionNodo = hermanos.next(positionNodo);
-				else 
-					positionNodo = null;
-				}
-			if(encontre) {
-				for(TNodo<E> hijos : nodo.getHijos()) {
-					padre.getHijos().addBefore(positionNodo, hijos);
-					hijos.setPadre(padre);
-				}
-				padre.getHijos().remove(positionNodo);
-				nodo.setElem(null);
-				nodo.setPadre(null);
-				nodo.setHijos(null);
-				size--;
+			while (it.hasNext() && !encontre) {
+				me = it.next();
+				encontre = me.element() == nodo;
 			}
-			else 
-				throw new InvalidPositionException("posicion invalida");
+			if (!encontre)
+				throw new InvalidPositionException("N no figura como hijo de su padre");
+			PositionList<TNodo<E>> hijosN = nodo.getHijos();
+			it = hijosN.positions().iterator();
+			while (it.hasNext()) {
+				TNodo<E> nh = it.next().element();
+				nh.setPadre(pa);
+				hijos.addBefore(me, nh);
 			}
+			hijos.remove(me);
+			/*nodo.setPadre(null);
+			nodo.setElem(null);
+			it = hijosN.positions().iterator();
+			while (it.hasNext())
+				hijosN.remove(it.next());
+			size--;*/
 		}
-		catch(InvalidPositionException | BoundaryViolationException | EmptyListException e) {}*/
-	        TNodo<E> nodo = checkNode(p);
-	        if (isExternal(p))
-	            throw new InvalidPositionException("p no es un nodo interno");
-	        if (nodo == root)
-	            if (nodo.getHijos().size() > 1)
-	                throw new InvalidPositionException("el nodo raiz a eliminar no puede tener mas de 1 hijo");
-	            else {
-	                try {
-	                    root = nodo.getHijos().first().element();
-	                    nodo.setElem(null);
-	                    nodo.getHijos().remove(nodo.getHijos().first());
-	                    root.setPadre(null);
-	                } catch (EmptyListException e) {
-	                    System.out.println(e.getMessage());
-	                }
-	            }
-	        else {
-	            TNodo<E> pa = nodo.getPadre();
-	            PositionList<TNodo<E>> hijos = pa.getHijos();
-	            Iterator<Position<TNodo<E>>> it = hijos.positions().iterator();
-	            Position<TNodo<E>> me = null;
-	            boolean encontre = false;
-	            while (it.hasNext() && !encontre) {
-	                me = it.next();
-	                encontre = me.element() == nodo;
-	            }
-	            if (!encontre)
-	                throw new InvalidPositionException("N no figura como hijo de su padre");
-	            PositionList<TNodo<E>> hijosN = nodo.getHijos();
-	            it = hijosN.positions().iterator();
-	            while (it.hasNext()) {
-	                TNodo<E> nh = it.next().element();
-	                nh.setPadre(pa);
-	                hijos.addBefore(me, nh);
-	            }
-	            hijos.remove(me);
-	            nodo.setPadre(null);
-	            nodo.setElem(null);
-	            it = hijosN.positions().iterator();
-	            while (it.hasNext())
-	                hijosN.remove(it.next());
-	            size--;
-	        }
-	   }
+	}
 
 	@Override
 	public void removeNode(Position<E> p) throws InvalidPositionException {

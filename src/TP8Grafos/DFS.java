@@ -4,6 +4,9 @@ import TDAMap.InvalidKeyException;
 
 import TDAGrafoVD.*;
 import TDALista.*;
+
+import java.util.Iterator;
+
 import TDACola.*;
 
 public class DFS<V, E> {
@@ -22,11 +25,12 @@ public class DFS<V, E> {
 			if(v.get(ESTADO) == NO_VISITADO)
 				dfs(g,v,l);
 		}
+		
 		return l;
 	}
 	private void dfs(Graph<V,E> g, Vertex<V> v,PositionList<V> l) throws InvalidKeyException, InvalidVertexException, InvalidEdgeException {
 		//hacemos el procesamiento de V
-		System.out.print(v.element());
+		l.addLast(v.element());
 		v.put(ESTADO, VISITADO);
 		Iterable<Edge<E>> adyacentes = g.incidentEdges(v);
 		for(Edge<E> e : adyacentes) {
@@ -36,6 +40,37 @@ public class DFS<V, E> {
 		}
 		//aca iria el post-procesamiento de v si fuera necesario
 	}
+	
+	
+	//Comprobar si un grafo es conexo DFS
+	public boolean esConexoDFS(Graph<V,E> g) {
+		boolean conexo = true;
+		try {
+			for(Vertex<V> v : g.vertices()) {
+				v.put(ESTADO, NO_VISITADO);
+			}
+			dfs(g,g.vertices().iterator().next());
+			Iterator<Vertex<V>> it = g.vertices().iterator();
+			while(it.hasNext() && conexo) {
+				if(it.next().get(ESTADO) == NO_VISITADO)
+					conexo = false;
+			}
+		}catch(InvalidKeyException e) {}
+		return conexo;
+	}
+	private void dfs(Graph<V,E> g, Vertex<V> v) {
+		try {
+			v.put(ESTADO, VISITADO);
+			Iterable<Edge<E>> adyacentes = g.incidentEdges(v);
+			for(Edge<E> e : adyacentes) {
+				Vertex<V> w = g.opposite(v, e);
+				if(w.get(ESTADO)==NO_VISITADO)
+					dfs(g,w);
+			}
+		}catch(InvalidKeyException | InvalidVertexException | InvalidEdgeException e) {}
+	}
+	
+	
 	
 	
 	
